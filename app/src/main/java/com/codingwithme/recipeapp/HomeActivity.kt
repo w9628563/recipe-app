@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
-class HomeActivity : BaseActivity() {
+abstract class HomeActivity : BaseActivity() {
     private lateinit var searchView: SearchView
     var arrMainCategory = ArrayList<CategoryItems>()
     var arrSubCategory = ArrayList<MealsItems>()

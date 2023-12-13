@@ -7,9 +7,10 @@ import android.os.Bundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import pub.devrel.easypermissions.EasyPermissions
 import kotlin.coroutines.CoroutineContext
 
-open class BaseActivity : AppCompatActivity(),CoroutineScope {
+abstract class BaseActivity : AppCompatActivity(),CoroutineScope, EasyPermissions.PermissionCallbacks  {
     private lateinit var job: Job
     override val coroutineContext:CoroutineContext
     get() = job +Dispatchers.Main
@@ -23,6 +24,19 @@ open class BaseActivity : AppCompatActivity(),CoroutineScope {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+        handlePermissionsResult(requestCode, grantResults)
+    }
+
+    open fun handlePermissionsResult(requestCode: Int, grantResults: IntArray) {
+        // Handle permissions result in the base class
     }
 
 }

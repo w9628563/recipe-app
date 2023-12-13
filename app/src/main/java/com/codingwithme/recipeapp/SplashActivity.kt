@@ -1,10 +1,12 @@
 package com.codingwithme.recipeapp
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.codingwithme.recipeapp.database.RecipeDatabase
 import com.codingwithme.recipeapp.entities.Category
 import com.codingwithme.recipeapp.entities.CategoryItems
@@ -29,15 +31,16 @@ class SplashActivity : BaseActivity(), EasyPermissions.RationaleCallbacks,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        readStorageTask()
-
+       // readStorageTask()
+        requestLocationPermission()
         btnGetStarted.setOnClickListener {
             var intent = Intent(this@SplashActivity, OptionMenu::class.java)
             startActivity(intent)
             finish()
         }
+        clearDataBase()
+        getCategories()
     }
-
 
     fun getCategories() {
         val service = RetrofitClientInstance.retrofitInstance!!.create(GetDataService::class.java)
@@ -181,5 +184,61 @@ class SplashActivity : BaseActivity(), EasyPermissions.RationaleCallbacks,
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
 
+    }
+    private val LOCATION_PERMISSION_CODE = 123
+
+    private fun requestLocationPermission() {
+        val fineLocationPermission =
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocationPermission =
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (fineLocationPermission == PackageManager.PERMISSION_GRANTED &&
+            coarseLocationPermission == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permissions already granted
+            onLocationPermissionGranted()
+        } else {
+            // Request location permissions using EasyPermissions
+            EasyPermissions.requestPermissions(
+                this,
+                "This app needs access to your location.",
+                LOCATION_PERMISSION_CODE,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        }
+    }
+
+    private fun onLocationPermissionGranted() {
+        // Permission granted, you can perform actions here
+        // For example, start location tracking, fetch location, etc.
+    }
+
+    // Override the EasyPermissions callback
+    override fun handlePermissionsResult(requestCode: Int, grantResults: IntArray) {
+        if (requestCode == LOCATION_PERMISSION_CODE) {
+            if (EasyPermissions.hasPermissions(
+                    this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            ) {
+                onLocationPermissionGranted()
+            } else {
+                if (EasyPermissions.somePermissionPermanentlyDenied(
+                        this,
+                        listOf(
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                ) {
+                    AppSettingsDialog.Builder(this).build().show()
+                } else {
+                    Toast.makeText(this, "Location permissions denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

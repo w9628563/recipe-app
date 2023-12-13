@@ -16,7 +16,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-class DetailActivity : BaseActivity() {
+abstract class DetailActivity : BaseActivity() {
 
     var youtubeLink = ""
     override fun onCreate(savedInstanceState: Bundle?) {
